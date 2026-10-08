@@ -190,6 +190,32 @@ class _FamilyScreenState extends State<FamilyScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if (Navigator.canPop(context)) ...[
+            InkWell(
+              onTap: () => Navigator.pop(context),
+              borderRadius: BorderRadius.circular(12),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.arrow_back_ios_new_rounded,
+                        size: 20, color: AppTheme.textPrimary(context)),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Quay lại',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.textPrimary(context),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
           Text('Gia đình', style: Theme.of(context).textTheme.displayMedium),
           const SizedBox(height: 8),
           Text(
@@ -198,25 +224,23 @@ class _FamilyScreenState extends State<FamilyScreen> {
           ),
           const SizedBox(height: 20),
           NmCard(
-            gradient: const LinearGradient(
-              colors: [Color(0xFFFF7378), Color(0xFFFF8E9D)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            border: Border.all(color: Colors.white.withOpacity(0.16)),
+            color: AppTheme.isDark(context)
+                ? AppTheme.darkSurface
+                : const Color(0xFFEAF0ED),
+            shadows: const [],
             child: Row(
               children: [
                 Expanded(
                   child: Text(
-                    'For Partner\nand loved ones',
+                    'Người thân cùng đồng hành',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          color: Colors.white,
-                          fontSize: 24,
+                          color: AppTheme.textPrimary(context),
+                          fontSize: 21,
                         ),
                   ),
                 ),
                 const Icon(Icons.favorite_rounded,
-                    color: Colors.white, size: 54),
+                    color: AppTheme.sageGreen, size: 38),
               ],
             ),
           ),

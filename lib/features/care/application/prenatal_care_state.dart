@@ -7,7 +7,7 @@ class PrenatalCareState extends ChangeNotifier {
 
   final List<MedicalRecordEntry> records = <MedicalRecordEntry>[];
   final List<CareQuestion> questions = <CareQuestion>[];
-  final List<PreparationItem> preparationItems = const <PreparationItem>[
+  final List<PreparationItem> preparationItems = <PreparationItem>[
     PreparationItem(
       id: 'documents-1',
       group: 'Hồ sơ cần mang',

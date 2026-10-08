@@ -10,39 +10,31 @@ class AiAssistantScreen extends StatefulWidget {
 }
 
 class _AiAssistantScreenState extends State<AiAssistantScreen> {
-  final TextEditingController _inputController = TextEditingController();
-  final ScrollController _scrollController = ScrollController();
-
-  final List<String> _quickPrompts = [
-    'Mốc 24 tuần cần lưu ý gì?',
-    'Bị phù chân có nguy hiểm không?',
-    'Uống canxi và sắt thế nào đúng cách?',
-    'Bé đạp bao nhiêu lần một ngày là chuẩn?',
-    'Gợi ý thực phẩm giàu đạm cho mẹ bầu?',
+  final _input = TextEditingController();
+  final _scroll = ScrollController();
+  static const _prompts = [
+    'Chuẩn bị gì cho lần khám tới?',
+    'Gợi ý bữa ăn đa dạng',
+    'Ghi lại triệu chứng thế nào?',
   ];
 
-  void _sendMessage([String? text]) {
-    final query = text ?? _inputController.text;
-    if (query.trim().isEmpty) return;
-
-    AppState.instance.sendAssistantMessage(query.trim());
-    _inputController.clear();
-
-    Future.delayed(const Duration(milliseconds: 150), () {
-      if (_scrollController.hasClients) {
-        _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent + 80,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
-        );
-      }
+  void _send([String? suggestion]) {
+    final message = (suggestion ?? _input.text).trim();
+    if (message.isEmpty) return;
+    AppState.instance.sendAssistantMessage(message);
+    _input.clear();
+    Future.delayed(const Duration(milliseconds: 700), () {
+      if (!mounted || !_scroll.hasClients) return;
+      _scroll.animateTo(_scroll.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 320),
+          curve: Curves.easeOutCubic);
     });
   }
 
   @override
   void dispose() {
-    _inputController.dispose();
-    _scrollController.dispose();
+    _input.dispose();
+    _scroll.dispose();
     super.dispose();
   }
 
@@ -52,280 +44,184 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> {
       listenable: AppState.instance,
       builder: (context, _) {
         final messages = AppState.instance.assistantMessages;
-
         return Scaffold(
           backgroundColor: AppTheme.bg(context),
-          appBar: AppBar(
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            title: Row(
+          body: SafeArea(
+            bottom: false,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: const BoxDecoration(
-                    color: AppTheme.primaryPurple,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.smart_toy_rounded,
-                      color: Colors.white, size: 20),
-                ),
-                const SizedBox(width: 10),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Trợ lý AI NutriMom',
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
-                    Row(
-                      children: [
-                        Container(
-                          width: 8,
-                          height: 8,
-                          decoration: const BoxDecoration(
-                            color: AppTheme.sageGreen,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        const SizedBox(width: 5),
-                        Text(
-                          'Trực tuyến • Bác sĩ AI đồng hành',
-                          style: TextStyle(
-                            fontSize: 11.5,
-                            color: AppTheme.textSecondary(context),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          body: Column(
-            children: [
-              // Safety Disclaimer
-              Container(
-                margin: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
-                decoration: BoxDecoration(
-                  color: AppTheme.blush.withOpacity(0.6),
-                  borderRadius: BorderRadius.circular(14),
-                  border:
-                      Border.all(color: AppTheme.coral.withOpacity(0.2)),
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Icon(Icons.info_outline_rounded,
-                        color: AppTheme.coral, size: 18),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'Trợ lý AI cung cấp kiến thức thai kỳ tham khảo. Luôn tham khảo ý kiến bác sĩ khi có triệu chứng bất thường.',
-                        style: TextStyle(
-                          fontSize: 11.5,
-                          color: AppTheme.textPrimary(context),
-                          height: 1.3,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              // Chat Messages
-              Expanded(
-                child: ListView.builder(
-                  controller: _scrollController,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  itemCount: messages.length,
-                  itemBuilder: (context, index) {
-                    final msg = messages[index];
-                    final isUser = msg['isUser'] == true;
-
-                    return Align(
-                      alignment:
-                          isUser ? Alignment.centerRight : Alignment.centerLeft,
-                      child: Container(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        constraints: BoxConstraints(
-                          maxWidth: MediaQuery.of(context).size.width * 0.82,
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 12),
-                        decoration: BoxDecoration(
-                          color: isUser
-                              ? AppTheme.primaryPurple
-                              : AppTheme.surface(context),
-                          borderRadius: BorderRadius.only(
-                            topLeft: const Radius.circular(18),
-                            topRight: const Radius.circular(18),
-                            bottomLeft: isUser
-                                ? const Radius.circular(18)
-                                : const Radius.circular(4),
-                            bottomRight: isUser
-                                ? const Radius.circular(4)
-                                : const Radius.circular(18),
-                          ),
-                          border: isUser
-                              ? null
-                              : Border.all(color: AppTheme.border(context)),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.03),
-                              blurRadius: 6,
-                              offset: const Offset(0, 2),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(22, 18, 22, 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (Navigator.canPop(context)) ...[
+                        InkWell(
+                          onTap: () => Navigator.pop(context),
+                          borderRadius: BorderRadius.circular(12),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 4),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.arrow_back_ios_new_rounded,
+                                    size: 20,
+                                    color: AppTheme.textPrimary(context)),
+                                const SizedBox(width: 6),
+                                Text(
+                                  'Quay lại',
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppTheme.textPrimary(context),
+                                  ),
+                                ),
+                              ],
                             ),
-                          ],
+                          ),
                         ),
-                        child: Column(
+                        const SizedBox(height: 10),
+                      ],
+                      Text('GÓC HỎI ĐÁP',
+                          style: TextStyle(
+                              color: AppTheme.textSecondary(context),
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 1.4)),
+                      const SizedBox(height: 5),
+                      Text('Trợ lý',
+                          style: Theme.of(context).textTheme.displayLarge),
+                      const SizedBox(height: 13),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                            color: AppTheme.isDark(context)
+                                ? AppTheme.darkSurface
+                                : const Color(0xFFEAF0ED),
+                            borderRadius: BorderRadius.circular(16)),
+                        child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            if (!isUser) ...[
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(Icons.auto_awesome,
-                                      size: 13, color: AppTheme.primaryPurple),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    'NutriMom AI',
-                                    style: TextStyle(
-                                      color: AppTheme.primaryPurple,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 11,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 6),
-                            ],
-                            Text(
-                              msg['text'] ?? '',
-                              style: TextStyle(
-                                color: isUser
-                                    ? Colors.white
-                                    : AppTheme.textPrimary(context),
-                                fontSize: 14,
-                                height: 1.4,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Align(
-                              alignment: Alignment.bottomRight,
+                            const Icon(Icons.info_outline_rounded,
+                                color: AppTheme.sageGreen, size: 19),
+                            const SizedBox(width: 10),
+                            Expanded(
                               child: Text(
-                                msg['time'] ?? '',
-                                style: TextStyle(
-                                  color: isUser
-                                      ? Colors.white70
-                                      : AppTheme.textSecondary(context),
-                                  fontSize: 10,
-                                ),
+                                'Bản thử nghiệm trả lời bằng nội dung mẫu, không phân tích hồ sơ của mẹ. Nếu có triệu chứng bất thường, hãy liên hệ bác sĩ hoặc cơ sở y tế.',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(height: 1.45),
                               ),
                             ),
                           ],
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-
-              // Quick Prompts Bar
-              SizedBox(
-                height: 40,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  itemCount: _quickPrompts.length,
-                  itemBuilder: (context, i) {
-                    final prompt = _quickPrompts[i];
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: ActionChip(
-                        label: Text(
-                          prompt,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: AppTheme.primaryPurple,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        backgroundColor:
-                            AppTheme.primaryPurple.withOpacity(0.08),
-                        side: BorderSide(
-                          color: AppTheme.primaryPurple.withOpacity(0.2),
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        onPressed: () => _sendMessage(prompt),
-                      ),
-                    );
-                  },
-                ),
-              ),
-
-              const SizedBox(height: 8),
-
-              // Bottom Input Box
-              SafeArea(
-                top: false,
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: AppTheme.surface(context),
-                    border: Border(
-                      top: BorderSide(color: AppTheme.border(context)),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: _inputController,
-                          decoration: InputDecoration(
-                            hintText: 'Hỏi bác sĩ AI về dinh dưỡng, thai kỳ...',
-                            hintStyle: TextStyle(
-                              color: AppTheme.textSecondary(context),
-                              fontSize: 13.5,
-                            ),
-                            filled: true,
-                            fillColor: AppTheme.isDark(context)
-                                ? Colors.white10
-                                : const Color(0xFFF5F6FA),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 12,
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(24),
-                              borderSide: BorderSide.none,
-                            ),
-                          ),
-                          onSubmitted: (val) => _sendMessage(),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        decoration: const BoxDecoration(
-                          color: AppTheme.primaryPurple,
-                          shape: BoxShape.circle,
-                        ),
-                        child: IconButton(
-                          icon: const Icon(Icons.send_rounded,
-                              color: Colors.white, size: 20),
-                          onPressed: () => _sendMessage(),
                         ),
                       ),
                     ],
                   ),
                 ),
-              ),
-            ],
+                Expanded(
+                  child: ListView.builder(
+                    controller: _scroll,
+                    padding: const EdgeInsets.fromLTRB(22, 10, 22, 16),
+                    itemCount: messages.length,
+                    itemBuilder: (context, index) {
+                      final message = messages[index];
+                      final isUser = message['isUser'] == true;
+                      return Align(
+                        alignment: isUser
+                            ? Alignment.centerRight
+                            : Alignment.centerLeft,
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 220),
+                          curve: Curves.easeOutCubic,
+                          constraints: BoxConstraints(
+                              maxWidth: MediaQuery.sizeOf(context).width * .82),
+                          margin: const EdgeInsets.only(bottom: 12),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 13),
+                          decoration: BoxDecoration(
+                            color: isUser
+                                ? AppTheme.primaryPurple
+                                : AppTheme.surface(context),
+                            borderRadius: BorderRadius.circular(17),
+                            border: isUser
+                                ? null
+                                : Border.all(color: AppTheme.border(context)),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (!isUser) ...[
+                                const Text('NutriMom · Nội dung mẫu',
+                                    style: TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w700,
+                                        color: AppTheme.sageGreen)),
+                                const SizedBox(height: 6),
+                              ],
+                              Text(message['text'] as String? ?? '',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.copyWith(
+                                          color: isUser
+                                              ? Colors.white
+                                              : AppTheme.textPrimary(context),
+                                          height: 1.5)),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                SizedBox(
+                  height: 43,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 22),
+                    itemCount: _prompts.length,
+                    separatorBuilder: (_, __) => const SizedBox(width: 8),
+                    itemBuilder: (context, index) => ActionChip(
+                      label: Text(_prompts[index]),
+                      onPressed: () => _send(_prompts[index]),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.fromLTRB(18, 11, 18, 10),
+                  decoration: BoxDecoration(
+                    color: AppTheme.surface(context),
+                    border: Border(
+                        top: BorderSide(color: AppTheme.border(context))),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _input,
+                          textInputAction: TextInputAction.send,
+                          onSubmitted: (_) => _send(),
+                          decoration: const InputDecoration(
+                              hintText: 'Mẹ muốn tìm hiểu điều gì?',
+                              isDense: true),
+                        ),
+                      ),
+                      const SizedBox(width: 9),
+                      IconButton.filled(
+                        tooltip: 'Gửi câu hỏi',
+                        onPressed: () => _send(),
+                        icon: const Icon(Icons.arrow_upward_rounded),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },

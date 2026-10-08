@@ -147,19 +147,7 @@ class _OnboardingProScreenState extends State<OnboardingProScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
-          gradient: AppTheme.isDark(context)
-              ? const LinearGradient(
-                  colors: [Color(0xFF121114), Color(0xFF221820)],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                )
-              : const LinearGradient(
-                  colors: [Color(0xFFFFFBFE), Color(0xFFFFE6EC)],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                ),
-        ),
+        decoration: BoxDecoration(color: AppTheme.bg(context)),
         child: SafeArea(
           child: Column(
             children: [
@@ -295,7 +283,7 @@ class _WelcomePage extends StatelessWidget {
           TweenAnimationBuilder<double>(
             tween: Tween(begin: 0.8, end: 1.0),
             duration: const Duration(milliseconds: 600),
-            curve: Curves.elasticOut,
+            curve: Curves.easeOutCubic,
             builder: (context, value, child) {
               return Transform.scale(
                 scale: value,
@@ -306,34 +294,27 @@ class _WelcomePage extends StatelessWidget {
               width: 140,
               height: 140,
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [AppTheme.coral, AppTheme.primaryPurple],
-                ),
-                borderRadius: BorderRadius.circular(36),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppTheme.coral.withOpacity(0.3),
-                    blurRadius: 30,
-                    offset: const Offset(0, 15),
-                  ),
-                ],
+                color: AppTheme.isDark(context)
+                    ? AppTheme.darkSurface
+                    : AppTheme.sageGreenLight,
+                borderRadius: BorderRadius.circular(30),
               ),
               child: const Icon(
                 Icons.child_care_rounded,
                 size: 80,
-                color: Colors.white,
+                color: AppTheme.sageGreen,
               ),
             ),
           ),
           const SizedBox(height: 48),
           Text(
-            'Chào mừng đến\nvới NutriMom AI! 🌟',
+            'Bắt đầu hành trình\ncủa mẹ',
             style: Theme.of(context).textTheme.displayMedium,
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
           Text(
-            'Hành trình tuyệt vời nhất cuộc đời đang chờ bạn phía trước.\nChúng mình sẽ đồng hành cùng bạn mỗi ngày.',
+            'Thiết lập vài thông tin cơ bản để theo dõi thai kỳ và lưu lại những điều quan trọng.',
             style: Theme.of(context).textTheme.bodyMedium,
             textAlign: TextAlign.center,
           ),

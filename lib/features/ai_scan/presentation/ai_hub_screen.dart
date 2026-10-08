@@ -2,11 +2,9 @@ import 'package:flutter/material.dart';
 import '../../../app_theme.dart';
 import '../../../core/services/app_state.dart';
 import '../../../core/widgets/nm_design.dart';
-import '../../../core/widgets/premium_gate_dialog.dart';
 import '../../consultation/presentation/consultation_screen.dart';
 import '../../health/presentation/health_metrics_screen.dart';
 import '../../nutrition_calendar/presentation/calendar_reminder_screen.dart';
-import '../../profile/presentation/premium_upgrade_flow.dart';
 import 'camera_mock_screen.dart';
 import 'food_scan_result_screen.dart';
 import 'medical_scan_result_screen.dart';
@@ -16,27 +14,6 @@ class AiHubScreen extends StatelessWidget {
 
   void _openScan(BuildContext context, String title, String instruction,
       Widget nextScreen) {
-    // Check premium status
-    if (!AppState.instance.isPremium) {
-      if (!AppState.instance.canPerformScan()) {
-        // Show premium gate dialog
-        PremiumGateDialog.show(
-          context,
-          onUpgrade: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const PremiumUpgradeFlow(),
-              ),
-            );
-          },
-        );
-        return;
-      }
-      // Use free scan
-      AppState.instance.incrementScanCount();
-    }
-
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -55,7 +32,6 @@ class AiHubScreen extends StatelessWidget {
       listenable: AppState.instance,
       builder: (context, child) {
         final state = AppState.instance;
-        final remainingScans = state.remainingFreeScans;
 
         return NmGradientScaffold(
           padding: const EdgeInsets.fromLTRB(20, 20, 20, 112),
@@ -66,7 +42,7 @@ class AiHubScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
-                    child: Text('Hôm nay, mẹ muốn làm gì?',
+                    child: Text('Công cụ chăm sóc',
                         style: Theme.of(context).textTheme.displayMedium),
                   ),
                   if (!state.isPremium)
@@ -84,9 +60,7 @@ class AiHubScreen extends StatelessWidget {
                               size: 14, color: AppTheme.accentOrange),
                           const SizedBox(width: 4),
                           Text(
-                            remainingScans > 0
-                                ? '$remainingScans scan free'
-                                : 'Hết lượt',
+                            'Bản mẫu',
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.bold,
@@ -100,7 +74,7 @@ class AiHubScreen extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'Quét nhanh bữa ăn, giấy khám và mở các công cụ chăm sóc thai kỳ.',
+                'Xem thử giao diện quét bữa ăn và giấy khám. Camera và AI phân tích chưa được kết nối.',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               const SizedBox(height: 22),
@@ -108,13 +82,13 @@ class AiHubScreen extends StatelessWidget {
                 children: [
                   Expanded(
                     child: _ScanHeroCard(
-                      title: 'Scan đồ ăn',
-                      subtitle: 'Phân tích dinh dưỡng bữa ăn bằng AI.',
+                      title: 'Bữa ăn mẫu',
+                      subtitle: 'Xem kết quả minh họa.',
                       icon: Icons.camera_alt_rounded,
                       accent: AppTheme.primaryPurple,
                       onTap: () => _openScan(
                         context,
-                        'Quét Bữa Ăn Dinh Dưỡng',
+                        'Bữa ăn mẫu',
                         'Đưa món ăn của mẹ vào chính giữa khung hình',
                         const FoodScanResultScreen(),
                       ),
@@ -123,13 +97,13 @@ class AiHubScreen extends StatelessWidget {
                   const SizedBox(width: 14),
                   Expanded(
                     child: _ScanHeroCard(
-                      title: 'Scan giấy khám',
-                      subtitle: 'Đọc và giải thích kết quả xét nghiệm.',
+                      title: 'Giấy khám mẫu',
+                      subtitle: 'Xem giao diện minh họa.',
                       icon: Icons.document_scanner_rounded,
                       accent: AppTheme.coral,
                       onTap: () => _openScan(
                         context,
-                        'Quét Giấy Khám Sức Khỏe',
+                        'Giấy khám mẫu',
                         'Căn chỉnh giấy khám ngay ngắn bên trong khung hình',
                         const MedicalScanResultScreen(),
                       ),
@@ -218,14 +192,10 @@ class _ScanHeroCard extends StatelessWidget {
     return NmCard(
       onTap: onTap,
       padding: const EdgeInsets.all(16),
-      gradient: LinearGradient(
-        colors: [
-          accent.withOpacity(AppTheme.isDark(context) ? 0.30 : 0.18),
-          AppTheme.surface(context),
-        ],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ),
+      color: AppTheme.isDark(context)
+          ? AppTheme.darkSurface
+          : accent.withOpacity(0.10),
+      shadows: const [],
       child: SizedBox(
         height: 172,
         child: Column(

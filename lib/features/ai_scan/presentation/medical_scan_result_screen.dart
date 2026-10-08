@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import '../../../app_theme.dart';
-import '../../../core/services/app_state.dart';
 
 class MedicalScanResultScreen extends StatelessWidget {
   const MedicalScanResultScreen({super.key});
@@ -26,7 +24,7 @@ class MedicalScanResultScreen extends StatelessWidget {
         title: Column(
           children: [
             Text(
-              'Kết quả xét nghiệm',
+              'Kết quả minh họa',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontSize: 17,
                     fontWeight: FontWeight.bold,
@@ -55,6 +53,15 @@ class MedicalScanResultScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        const SizedBox(height: 16),
+                        Text(
+                          'Các chỉ số dưới đây là dữ liệu mẫu. Ứng dụng chưa đọc ảnh xét nghiệm và chưa thể diễn giải kết quả của mẹ.',
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: AppTheme.accentRed,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                        ),
                         const SizedBox(height: 16),
                         _buildSectionHeader(context, 'Glucose (OGTT)'),
                         const SizedBox(height: 8),
@@ -131,70 +138,9 @@ class MedicalScanResultScreen extends StatelessWidget {
                 ),
                 Padding(
                   padding: const EdgeInsets.only(bottom: 12.0, top: 8.0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        flex: 1,
-                        child: OutlinedButton(
-                          onPressed: () {
-                            // Save metrics to AppState
-                            AppState.instance.updateHealthMetrics(
-                              null, // Keep current weight
-                              '120/80',
-                              85,
-                              5.7, // glucose
-                            );
-
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                    'Đã lưu các chỉ số xét nghiệm vào Hồ sơ sức khỏe!'),
-                                backgroundColor: AppTheme.primaryPurple,
-                              ),
-                            );
-                            Navigator.pop(context);
-                          },
-                          style: OutlinedButton.styleFrom(
-                            minimumSize: const Size(double.infinity, 54),
-                            side: const BorderSide(
-                                color: AppTheme.primaryPurple, width: 1.5),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                          ),
-                          child: const Text(
-                            'Lưu hồ sơ',
-                            style: TextStyle(
-                              color: AppTheme.primaryPurple,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 15,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        flex: 1,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            const link =
-                                'https://nutrimom.ai/share/report/med_9918';
-                            Clipboard.setData(const ClipboardData(text: link));
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                    'Đã sao chép liên kết chia sẻ kết quả xét nghiệm!'),
-                                backgroundColor: AppTheme.accentGreen,
-                              ),
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            minimumSize: const Size(double.infinity, 54),
-                          ),
-                          child: const Text('Chia sẻ'),
-                        ),
-                      ),
-                    ],
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Đóng bản mẫu'),
                   ),
                 ),
               ],

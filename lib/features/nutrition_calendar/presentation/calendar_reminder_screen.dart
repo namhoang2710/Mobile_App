@@ -352,8 +352,9 @@ class _CalendarReminderScreenState extends State<CalendarReminderScreen> {
             backgroundColor: Colors.transparent,
             elevation: 0,
             leading: IconButton(
-              icon: Icon(Icons.arrow_back_ios_new,
+              icon: Icon(Icons.arrow_back_ios_new_rounded,
                   color: AppTheme.textPrimary(context)),
+              tooltip: 'Quay lại',
               onPressed: () => Navigator.pop(context),
             ),
             centerTitle: true,

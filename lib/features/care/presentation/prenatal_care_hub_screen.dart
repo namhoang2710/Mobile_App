@@ -106,6 +106,14 @@ class _PrenatalCareHubScreenState extends State<PrenatalCareHubScreen> {
         return Scaffold(
           backgroundColor: AppTheme.bg(context),
           appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back_ios_new_rounded,
+                  color: AppTheme.textPrimary(context)),
+              tooltip: 'Quay lại',
+              onPressed: () => Navigator.pop(context),
+            ),
             title: const Text('Trung tâm chăm sóc'),
             actions: [
               IconButton(

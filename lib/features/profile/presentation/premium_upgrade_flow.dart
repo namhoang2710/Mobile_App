@@ -163,17 +163,8 @@ class _PremiumUpgradeFlowState extends State<PremiumUpgradeFlow> {
           width: double.infinity,
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-                colors: [Color(0xFF8B5CF6), Color(0xFFF59E0B)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight),
+            color: AppTheme.primaryPurple,
             borderRadius: BorderRadius.circular(24),
-            boxShadow: [
-              BoxShadow(
-                  color: const Color(0xFF8B5CF6).withOpacity(0.3),
-                  blurRadius: 24,
-                  offset: const Offset(0, 12))
-            ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mobile_app/app_theme.dart';
 import 'package:mobile_app/core/services/app_state.dart';
+import 'package:mobile_app/features/check_in/application/check_in_state.dart';
+import 'package:mobile_app/features/care/application/prenatal_care_state.dart';
 import 'package:mobile_app/features/dashboard/presentation/main_shell.dart';
 import 'package:mobile_app/main.dart';
 
@@ -46,6 +48,10 @@ void main() {
 
   testWidgets('bottom navigation switches across the five main tabs',
       (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
     await tester.pumpWidget(MaterialApp(
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
@@ -54,30 +60,71 @@ void main() {
     await tester.pumpAndSettle();
 
     for (final label in const [
-      'Home',
-      'Trợ lý AI',
-      'Dinh dưỡng',
-      'Gia đình',
-      'Profile'
+      'Hôm nay',
+      'Thai kỳ',
+      'Ăn uống',
+      'Trợ lý',
+      'Cá nhân'
     ]) {
       expect(find.text(label), findsWidgets);
     }
 
-    await tester.tap(find.text('Trợ lý AI'));
-    await tester.pumpAndSettle();
-    expect(find.text('Trợ lý AI NutriMom'), findsOneWidget);
+    await tester.tap(find.text('Thai kỳ').last);
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('HÀNH TRÌNH CỦA MẸ'), findsOneWidget);
 
-    await tester.tap(find.text('Dinh dưỡng'));
-    await tester.pumpAndSettle();
-    expect(find.text('Kế hoạch dinh dưỡng'), findsOneWidget);
+    await tester.tap(find.text('Ăn uống').last);
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('Thực đơn hôm nay'), findsOneWidget);
 
-    await tester.tap(find.text('Gia đình').last);
-    await tester.pumpAndSettle();
-    expect(find.text('Mời thành viên'), findsOneWidget);
+    await tester.tap(find.text('Trợ lý').last);
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.textContaining('Bản thử nghiệm trả lời bằng nội dung mẫu'),
+        findsOneWidget);
 
-    await tester.tap(find.text('Profile'));
-    await tester.pumpAndSettle();
-    expect(find.text('Try For Free'), findsOneWidget);
+    await tester.tap(find.text('Cá nhân').last);
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('Hành trình của mẹ'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  test('birth preparation item can be toggled', () {
+    final care = PrenatalCareState.instance;
+    final first = care.preparationItems.first;
+    care.togglePreparation(first.id);
+    expect(care.preparationItems.first.completed, !first.completed);
+    care.togglePreparation(first.id);
+    expect(care.preparationItems.first.completed, first.completed);
+  });
+
+  test('daily check-in is saved, replaced and removed by date', () async {
+    final store = _MemoryCheckInStore();
+    final state = CheckInState(store: store);
+    await state.load();
+
+    final date = DateTime(2026, 9, 23);
+    await state.save(DailyCheckIn(
+      date: date,
+      mood: 3,
+      energy: 2,
+      symptoms: const ['Mệt'],
+      note: 'Buổi sáng',
+    ));
+    await state.save(DailyCheckIn(
+      date: date,
+      mood: 4,
+      energy: 3,
+      symptoms: const [],
+      note: 'Buổi tối',
+    ));
+
+    final reloaded = CheckInState(store: store);
+    await reloaded.load();
+    expect(reloaded.entries, hasLength(1));
+    expect(reloaded.entries.single.note, 'Buổi tối');
+
+    await reloaded.remove('2026-09-23');
+    expect(reloaded.entries, isEmpty);
   });
 
   test('updates theme mode in app state', () {
@@ -114,4 +161,16 @@ void main() {
     state.deleteMedicalRecord('test_rec_1');
     expect(state.medicalRecords.length, initialCount);
   });
+}
+
+class _MemoryCheckInStore implements CheckInStore {
+  String? value;
+
+  @override
+  Future<String?> read() async => value;
+
+  @override
+  Future<void> write(String value) async {
+    this.value = value;
+  }
 }

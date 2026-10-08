@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+
 import '../../../app_theme.dart';
 import '../../../core/services/app_state.dart';
-import '../../../core/widgets/nm_design.dart';
+import '../../ai_scan/presentation/ai_hub_screen.dart';
 import 'calendar_reminder_screen.dart';
 
 class NutritionPlanScreen extends StatefulWidget {
@@ -12,241 +13,168 @@ class NutritionPlanScreen extends StatefulWidget {
 }
 
 class _NutritionPlanScreenState extends State<NutritionPlanScreen> {
-  String _selectedTab = 'Ngày';
-  int _selectedDayIndex = 0;
-
-  final List<String> _tabs = ['Ngày', 'Tuần', 'Tháng'];
-  final List<Map<String, String>> _days = [];
-
-  @override
-  void initState() {
-    super.initState();
-    final now = DateTime.now();
-    final firstDayOfWeek = now.subtract(Duration(days: now.weekday - 1));
-    for (int i = 0; i < 7; i++) {
-      final day = firstDayOfWeek.add(Duration(days: i));
-      final dayName = switch (day.weekday) {
-        1 => 'T2',
-        2 => 'T3',
-        3 => 'T4',
-        4 => 'T5',
-        5 => 'T6',
-        6 => 'T7',
-        _ => 'CN',
-      };
-      _days.add(
-          {'dayName': dayName, 'date': day.day.toString().padLeft(2, '0')});
-      if (day.day == now.day) _selectedDayIndex = i;
-    }
+  void _open(Widget screen) {
+    Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
   }
 
-  void _showCreatePlanWizard() {
-    bool hasDiabetes = false;
-    bool isVegan = false;
-    String goal = 'Tăng cân chuẩn';
-
-    showDialog(
+  Future<void> _createPlan() async {
+    bool vegan = AppState.instance.planConfig?['isVegan'] == true;
+    await showModalBottomSheet<void>(
       context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) {
-          return AlertDialog(
-            title: const Row(
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (sheetContext) => StatefulBuilder(
+        builder: (context, setSheetState) => Padding(
+          padding: const EdgeInsets.fromLTRB(22, 5, 22, 28),
+          child: SafeArea(
+            top: false,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(Icons.auto_awesome, color: AppTheme.primaryPurple),
-                SizedBox(width: 8),
-                Text('Khảo sát thực đơn AI'),
+                Text('Tạo thực đơn mẫu',
+                    style: Theme.of(context).textTheme.titleLarge),
+                const SizedBox(height: 7),
+                Text(
+                  'Chọn thông tin phù hợp để xem gợi ý bữa ăn. Hãy trao đổi với chuyên gia về chế độ ăn riêng của mẹ.',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                const SizedBox(height: 18),
+                SwitchListTile.adaptive(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Ăn chay'),
+                  value: vegan,
+                  onChanged: (value) => setSheetState(() => vegan = value),
+                ),
+                Text(
+                  'Nếu mẹ đang theo dõi đường huyết thai kỳ hoặc có chế độ ăn do bác sĩ chỉ định, đừng dùng thực đơn mẫu này để thay thế kế hoạch điều trị.',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+                const SizedBox(height: 16),
+                FilledButton(
+                  onPressed: () {
+                    AppState.instance.generateNutritionPlan({
+                      'isVegan': vegan,
+                      'hasDiabetes': false,
+                    });
+                    Navigator.pop(sheetContext);
+                  },
+                  child: const Text('Xem thực đơn'),
+                ),
               ],
             ),
-            content: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Mục tiêu dinh dưỡng',
-                      style: Theme.of(context).textTheme.titleSmall),
-                  const SizedBox(height: 8),
-                  DropdownButtonFormField<String>(
-                    value: goal,
-                    decoration: const InputDecoration(),
-                    items: const [
-                      DropdownMenuItem(
-                          value: 'Tăng cân chuẩn',
-                          child: Text('Tăng cân chuẩn thai kỳ')),
-                      DropdownMenuItem(
-                          value: 'Giảm nghén',
-                          child: Text('Hạn chế nghén & dễ nuốt')),
-                      DropdownMenuItem(
-                          value: 'Tiểu đường',
-                          child: Text('Kiểm soát tiểu đường thai kỳ')),
-                    ],
-                    onChanged: (val) {
-                      if (val == null) return;
-                      setDialogState(() {
-                        goal = val;
-                        hasDiabetes = val == 'Tiểu đường';
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 14),
-                  CheckboxListTile(
-                    title: const Text('Ăn chay'),
-                    value: isVegan,
-                    contentPadding: EdgeInsets.zero,
-                    onChanged: (val) =>
-                        setDialogState(() => isVegan = val ?? false),
-                  ),
-                  CheckboxListTile(
-                    title: const Text('Tiểu đường thai kỳ'),
-                    value: hasDiabetes,
-                    contentPadding: EdgeInsets.zero,
-                    onChanged: (val) =>
-                        setDialogState(() => hasDiabetes = val ?? false),
-                  ),
-                ],
-              ),
-            ),
-            actions: [
-              TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('Hủy')),
-              ElevatedButton(
-                onPressed: () {
-                  AppState.instance.generateNutritionPlan({
-                    'hasDiabetes': hasDiabetes,
-                    'isVegan': isVegan,
-                    'goal': goal,
-                  });
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text('Khởi tạo thực đơn AI thành công!')),
-                  );
-                },
-                child: const Text('Tạo thực đơn AI'),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-
-  void _showAddMealDialog() {
-    final typeController = TextEditingController(text: 'Bữa phụ');
-    final foodsController = TextEditingController();
-    final caloriesController = TextEditingController(text: '200 kcal');
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Thêm bữa ăn thủ công'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: typeController,
-              decoration: const InputDecoration(labelText: 'Loại bữa ăn'),
-            ),
-            const SizedBox(height: 10),
-            TextField(
-              controller: foodsController,
-              decoration: const InputDecoration(labelText: 'Thức ăn'),
-            ),
-            const SizedBox(height: 10),
-            TextField(
-              controller: caloriesController,
-              decoration: const InputDecoration(labelText: 'Lượng calo'),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Hủy')),
-          ElevatedButton(
-            onPressed: () {
-              final foods = foodsController.text.trim();
-              if (foods.isEmpty) return;
-              AppState.instance.addMeal({
-                'type': typeController.text.trim(),
-                'foods': foods,
-                'calories': caloriesController.text.trim(),
-                'icon': Icons.cookie_rounded,
-                'color': AppTheme.blush,
-                'iconColor': AppTheme.coral,
-              });
-              Navigator.pop(context);
-            },
-            child: const Text('Thêm'),
           ),
-        ],
+        ),
       ),
     );
   }
 
-  void _showMealDetails(int index, Map<String, dynamic> meal) {
-    showModalBottomSheet(
+  Future<void> _addMeal() async {
+    final type = TextEditingController(text: 'Bữa phụ');
+    final foods = TextEditingController();
+    final calories = TextEditingController();
+    await showModalBottomSheet<void>(
       context: context,
-      builder: (context) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (sheetContext) => Padding(
+        padding: EdgeInsets.fromLTRB(
+            22, 5, 22, MediaQuery.of(sheetContext).viewInsets.bottom + 28),
+        child: SafeArea(
+          top: false,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Thêm bữa ăn',
+                    style: Theme.of(sheetContext).textTheme.titleLarge),
+                const SizedBox(height: 20),
+                Text('Tên bữa',
+                    style: Theme.of(sheetContext).textTheme.titleSmall),
+                const SizedBox(height: 7),
+                TextField(controller: type),
+                const SizedBox(height: 14),
+                Text('Món ăn',
+                    style: Theme.of(sheetContext).textTheme.titleSmall),
+                const SizedBox(height: 7),
+                TextField(
+                  controller: foods,
+                  decoration: const InputDecoration(
+                      hintText: 'Ví dụ: bánh mì, trứng, rau'),
+                ),
+                const SizedBox(height: 14),
+                Text('Năng lượng ước tính (kcal)',
+                    style: Theme.of(sheetContext).textTheme.titleSmall),
+                const SizedBox(height: 7),
+                TextField(
+                  controller: calories,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(hintText: 'Ví dụ: 350'),
+                ),
+                const SizedBox(height: 20),
+                FilledButton(
+                  onPressed: () {
+                    if (foods.text.trim().isEmpty) {
+                      ScaffoldMessenger.of(sheetContext).showSnackBar(
+                        const SnackBar(content: Text('Vui lòng nhập món ăn.')),
+                      );
+                      return;
+                    }
+                    final kcal = int.tryParse(calories.text.trim());
+                    AppState.instance.addMeal({
+                      'type': type.text.trim().isEmpty
+                          ? 'Bữa ăn'
+                          : type.text.trim(),
+                      'foods': foods.text.trim(),
+                      'calories': kcal == null ? 'Chưa rõ' : '$kcal kcal',
+                      'icon': Icons.restaurant_rounded,
+                      'color': AppTheme.sageGreenLight,
+                      'iconColor': AppTheme.sageGreen,
+                    });
+                    Navigator.pop(sheetContext);
+                  },
+                  child: const Text('Lưu bữa ăn'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    type.dispose();
+    foods.dispose();
+    calories.dispose();
+  }
+
+  void _showMeal(int index, Map<String, dynamic> meal) {
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (sheetContext) => Padding(
+        padding: const EdgeInsets.fromLTRB(22, 5, 22, 28),
+        child: SafeArea(
+          top: false,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  NmIconBubble(icon: meal['icon'], color: meal['iconColor']),
-                  const SizedBox(width: 12),
-                  Expanded(
-                      child: Text(meal['type'],
-                          style: Theme.of(context).textTheme.titleMedium)),
-                  Text(meal['calories'],
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleSmall
-                          ?.copyWith(color: AppTheme.primaryPurple)),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Text('Món ăn chính',
-                  style: Theme.of(context).textTheme.titleSmall),
-              const SizedBox(height: 6),
-              Text(meal['foods'],
-                  style: Theme.of(context).textTheme.bodyMedium),
-              const SizedBox(height: 16),
-              NmCard(
-                shadows: const [],
-                color: AppTheme.mutedFill(context),
-                child: Text(
-                  'AI đánh giá bữa ăn giàu đạm, năng lượng ổn định và phù hợp cho mẹ bầu.',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-              ),
+              Text(meal['type'] as String,
+                  style: Theme.of(sheetContext).textTheme.titleLarge),
+              const SizedBox(height: 8),
+              Text(meal['foods'] as String,
+                  style: Theme.of(sheetContext).textTheme.bodyLarge),
+              const SizedBox(height: 12),
+              Text(meal['calories'] as String,
+                  style: Theme.of(sheetContext).textTheme.bodyMedium),
               const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () {
-                        AppState.instance.deleteMeal(index);
-                        Navigator.pop(context);
-                      },
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppTheme.accentRed,
-                        side: const BorderSide(color: AppTheme.accentRed),
-                      ),
-                      child: const Text('Xóa'),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('Đóng'),
-                    ),
-                  ),
-                ],
+              TextButton.icon(
+                onPressed: () {
+                  AppState.instance.deleteMeal(index);
+                  Navigator.pop(sheetContext);
+                },
+                icon: const Icon(Icons.delete_outline_rounded),
+                label: const Text('Xóa bữa ăn'),
               ),
             ],
           ),
@@ -259,222 +187,192 @@ class _NutritionPlanScreenState extends State<NutritionPlanScreen> {
   Widget build(BuildContext context) {
     return ListenableBuilder(
       listenable: AppState.instance,
-      builder: (context, child) {
+      builder: (context, _) {
         final state = AppState.instance;
         final meals = state.nutritionPlanMeals;
-        final totalCalories = meals.fold<int>(0, (sum, item) {
-          final calStr = item['calories'] as String;
-          final value =
-              int.tryParse(calStr.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
-          return sum + value;
+        final totalKcal = meals.fold<int>(0, (sum, item) {
+          final text = item['calories'] as String? ?? '';
+          return sum +
+              (int.tryParse(text.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0);
         });
 
-        return NmGradientScaffold(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 112),
-          floatingActionButton: state.hasNutritionPlan && _selectedTab == 'Ngày'
-              ? FloatingActionButton(
-                  onPressed: _showAddMealDialog,
-                  child: const Icon(Icons.add_rounded),
-                )
-              : null,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Expanded(
+        return Scaffold(
+          backgroundColor: AppTheme.bg(context),
+          body: SafeArea(
+            bottom: false,
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(22, 18, 22, 112),
+              children: [
+                if (Navigator.canPop(context)) ...[
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: InkWell(
+                      onTap: () => Navigator.pop(context),
+                      borderRadius: BorderRadius.circular(12),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.arrow_back_ios_new_rounded,
+                                size: 20, color: AppTheme.textPrimary(context)),
+                            const SizedBox(width: 6),
+                            Text(
+                              'Quay lại',
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                                color: AppTheme.textPrimary(context),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                ],
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('CHĂM SÓC TỪ BỮA ĂN',
+                              style: TextStyle(
+                                color: AppTheme.textSecondary(context),
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 1.3,
+                              )),
+                          const SizedBox(height: 5),
+                          Text('Dinh dưỡng',
+                              style: Theme.of(context).textTheme.displayLarge),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      tooltip: 'Mở lịch',
+                      onPressed: () => _open(const CalendarReminderScreen()),
+                      icon: const Icon(Icons.calendar_month_outlined),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 19),
+                Text(
+                  'Một thực đơn dễ theo dõi, để mẹ ăn uống chủ động hơn mỗi ngày.',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                const SizedBox(height: 23),
+                Material(
+                  color: AppTheme.isDark(context)
+                      ? AppTheme.darkSurface
+                      : const Color(0xFFEAF0ED),
+                  borderRadius: BorderRadius.circular(20),
+                  child: InkWell(
+                    onTap: () => _open(const AiHubScreen()),
+                    borderRadius: BorderRadius.circular(20),
+                    child: Padding(
+                      padding: const EdgeInsets.all(18),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.camera_alt_outlined,
+                              color: AppTheme.sageGreen, size: 30),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Quét thử bữa ăn',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium),
+                                const SizedBox(height: 3),
+                                Text('Xem giao diện phân tích dinh dưỡng mẫu',
+                                    style:
+                                        Theme.of(context).textTheme.bodySmall),
+                              ],
+                            ),
+                          ),
+                          const Icon(Icons.arrow_forward_rounded,
+                              color: AppTheme.sageGreen, size: 19),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 28),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text('Thực đơn hôm nay',
+                          style: Theme.of(context).textTheme.titleMedium),
+                    ),
+                    TextButton(
+                      onPressed: _createPlan,
+                      child: Text(
+                          state.hasNutritionPlan ? 'Đổi gợi ý' : 'Tạo gợi ý'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                if (!state.hasNutritionPlan)
+                  Container(
+                    padding: const EdgeInsets.all(21),
+                    decoration: BoxDecoration(
+                      color: AppTheme.surface(context),
+                      border: Border.all(color: AppTheme.border(context)),
+                      borderRadius: BorderRadius.circular(18),
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Kế hoạch dinh dưỡng',
-                            style: Theme.of(context).textTheme.displayMedium),
-                        const SizedBox(height: 8),
-                        Text(
-                            'Thực đơn cá nhân hóa theo tuần thai và mục tiêu sức khỏe.',
+                        const Icon(Icons.restaurant_menu_rounded,
+                            color: AppTheme.primaryPurple, size: 27),
+                        const SizedBox(height: 12),
+                        Text('Chưa có thực đơn',
+                            style: Theme.of(context).textTheme.titleMedium),
+                        const SizedBox(height: 4),
+                        Text('Tạo gợi ý mẫu hoặc tự thêm bữa ăn của mẹ.',
                             style: Theme.of(context).textTheme.bodyMedium),
+                        const SizedBox(height: 16),
+                        OutlinedButton(
+                            onPressed: _createPlan,
+                            child: const Text('Tạo thực đơn mẫu')),
                       ],
                     ),
-                  ),
-                  IconButton.filledTonal(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                const CalendarReminderScreen()),
-                      );
-                    },
-                    icon: const Icon(Icons.calendar_month_rounded),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 22),
-              NmSegmentedTabs(
-                tabs: _tabs,
-                selected: _selectedTab,
-                onChanged: (tab) => setState(() => _selectedTab = tab),
-              ),
-              const SizedBox(height: 20),
-              if (!state.hasNutritionPlan)
-                NmEmptyState(
-                  icon: Icons.restaurant_rounded,
-                  title: 'Chưa có thực đơn dinh dưỡng',
-                  message:
-                      'Hãy để AI cá nhân hóa thực đơn cho mẹ dựa trên mốc thai kỳ và mục tiêu sức khỏe.',
-                  actionLabel: 'Tạo kế hoạch dinh dưỡng AI',
-                  onAction: _showCreatePlanWizard,
-                )
-              else if (_selectedTab == 'Ngày') ...[
-                SizedBox(
-                  height: 78,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: _days.length,
-                    separatorBuilder: (context, index) =>
-                        const SizedBox(width: 10),
-                    itemBuilder: (context, index) {
-                      final day = _days[index];
-                      final selected = _selectedDayIndex == index;
-                      return GestureDetector(
-                        onTap: () => setState(() => _selectedDayIndex = index),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 180),
-                          width: 54,
-                          decoration: BoxDecoration(
-                            color: selected
-                                ? AppTheme.primaryPurple
-                                : AppTheme.surface(context),
-                            borderRadius: BorderRadius.circular(18),
-                            border: Border.all(
-                                color: selected
-                                    ? AppTheme.primaryPurple
-                                    : AppTheme.border(context)),
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                day['dayName']!,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .labelMedium
-                                    ?.copyWith(
-                                      color: selected
-                                          ? Colors.white70
-                                          : AppTheme.textSecondary(context),
-                                    ),
-                              ),
-                              const SizedBox(height: 5),
-                              Text(
-                                day['date']!,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleSmall
-                                    ?.copyWith(
-                                      color: selected
-                                          ? Colors.white
-                                          : AppTheme.textPrimary(context),
-                                    ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                const SizedBox(height: 22),
-                if (meals.isEmpty)
-                  NmEmptyState(
-                    icon: Icons.no_food_outlined,
-                    title: 'Hôm nay chưa có bữa ăn',
-                    message:
-                        'Bấm nút + để thêm bữa ăn hoặc tạo lại kế hoạch bằng AI.',
-                    actionLabel: 'Tạo kế hoạch AI',
-                    onAction: _showCreatePlanWizard,
                   )
                 else ...[
-                  ListView.separated(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: meals.length,
-                    separatorBuilder: (context, index) =>
-                        const SizedBox(height: 12),
-                    itemBuilder: (context, index) {
-                      final meal = meals[index];
-                      return NmActionCard(
-                        title: meal['type'],
-                        subtitle: meal['foods'],
-                        icon: meal['icon'],
-                        accent: meal['iconColor'],
-                        trailing: Text(
-                          meal['calories'],
-                          style: Theme.of(context)
-                              .textTheme
-                              .labelMedium
-                              ?.copyWith(color: AppTheme.primaryPurple),
-                        ),
-                        onTap: () => _showMealDetails(index, meal),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  NmCard(
-                    color: AppTheme.mutedFill(context),
-                    shadows: const [],
-                    child: Row(
-                      children: [
-                        Expanded(
-                            child: Text('Tổng năng lượng',
-                                style: Theme.of(context).textTheme.titleSmall)),
-                        Text(
-                          '$totalCalories kcal',
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleMedium
-                              ?.copyWith(color: AppTheme.primaryPurple),
-                        ),
-                      ],
+                  if (totalKcal > 0) ...[
+                    Text('Khoảng $totalKcal kcal từ các bữa đã ghi',
+                        style: Theme.of(context).textTheme.bodyMedium),
+                    const SizedBox(height: 10),
+                  ],
+                  for (var i = 0; i < meals.length; i++) ...[
+                    _MealRow(
+                      meal: meals[i],
+                      onTap: () => _showMeal(i, meals[i]),
                     ),
-                  ),
+                    if (i != meals.length - 1)
+                      Divider(height: 1, color: AppTheme.border(context)),
+                  ],
                 ],
-              ] else if (_selectedTab == 'Tuần') ...[
-                NmCard(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Phân bổ chất dinh dưỡng tuần này',
-                          style: Theme.of(context).textTheme.titleMedium),
-                      const SizedBox(height: 20),
-                      const _ProgressRow(
-                          label: 'Tinh bột',
-                          value: 0.50,
-                          percent: '50%',
-                          color: AppTheme.primaryPurple),
-                      const _ProgressRow(
-                          label: 'Chất đạm',
-                          value: 0.25,
-                          percent: '25%',
-                          color: AppTheme.accentGreen),
-                      const _ProgressRow(
-                          label: 'Chất béo',
-                          value: 0.25,
-                          percent: '25%',
-                          color: AppTheme.accentOrange),
-                    ],
-                  ),
+                const SizedBox(height: 19),
+                OutlinedButton.icon(
+                  onPressed: _addMeal,
+                  icon: const Icon(Icons.add_rounded),
+                  label: const Text('Thêm bữa ăn'),
                 ),
-              ] else ...[
-                NmEmptyState(
-                  icon: Icons.check_circle_outline_rounded,
-                  title: 'Thống kê tháng',
-                  message:
-                      'Mẹ đã duy trì thực đơn lành mạnh 28/30 ngày của tháng.',
-                  actionLabel: 'Thiết lập lại mục tiêu',
-                  onAction: _showCreatePlanWizard,
+                const SizedBox(height: 11),
+                Text(
+                  'Thực đơn trên chỉ là gợi ý mẫu; nhu cầu dinh dưỡng cần được cá nhân hóa theo tư vấn y tế.',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppTheme.textSecondary(context),
+                        height: 1.45,
+                      ),
                 ),
               ],
-            ],
+            ),
           ),
         );
       },
@@ -482,49 +380,50 @@ class _NutritionPlanScreenState extends State<NutritionPlanScreen> {
   }
 }
 
-class _ProgressRow extends StatelessWidget {
-  final String label;
-  final double value;
-  final String percent;
-  final Color color;
-
-  const _ProgressRow({
-    required this.label,
-    required this.value,
-    required this.percent,
-    required this.color,
-  });
+class _MealRow extends StatelessWidget {
+  const _MealRow({required this.meal, required this.onTap});
+  final Map<String, dynamic> meal;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                  child: Text(label,
-                      style: Theme.of(context).textTheme.titleSmall)),
-              Text(percent,
-                  style: Theme.of(context)
-                      .textTheme
-                      .labelMedium
-                      ?.copyWith(color: color)),
-            ],
-          ),
-          const SizedBox(height: 8),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(999),
-            child: LinearProgressIndicator(
-              value: value,
-              minHeight: 10,
-              backgroundColor: AppTheme.mutedFill(context),
-              color: color,
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 15),
+        child: Row(
+          children: [
+            Container(
+              width: 45,
+              height: 45,
+              decoration: BoxDecoration(
+                color: AppTheme.mutedFill(context),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(Icons.restaurant_outlined,
+                  color: AppTheme.sageGreen, size: 22),
             ),
-          ),
-        ],
+            const SizedBox(width: 13),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(meal['type'] as String,
+                      style: Theme.of(context).textTheme.titleSmall),
+                  const SizedBox(height: 3),
+                  Text(meal['foods'] as String,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodySmall),
+                ],
+              ),
+            ),
+            const SizedBox(width: 7),
+            Text(meal['calories'] as String,
+                style: Theme.of(context).textTheme.labelMedium),
+          ],
+        ),
       ),
     );
   }

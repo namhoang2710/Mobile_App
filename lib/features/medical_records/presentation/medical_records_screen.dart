@@ -379,6 +379,12 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> {
           appBar: AppBar(
             backgroundColor: Colors.transparent,
             elevation: 0,
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back_ios_new_rounded,
+                  color: AppTheme.textPrimary(context)),
+              tooltip: 'Quay lại',
+              onPressed: () => Navigator.pop(context),
+            ),
             title: const Text(
               'Hồ sơ y tế thai kỳ',
               style: TextStyle(fontWeight: FontWeight.bold),

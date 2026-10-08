@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../../app_theme.dart';
-import '../../../core/services/app_state.dart';
-import 'camera_mock_screen.dart';
 
 class FoodScanResultScreen extends StatelessWidget {
   const FoodScanResultScreen({super.key});
@@ -26,7 +24,7 @@ class FoodScanResultScreen extends StatelessWidget {
         title: Column(
           children: [
             Text(
-              'Kết quả dinh dưỡng',
+              'Kết quả minh họa',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontSize: 17,
                     fontWeight: FontWeight.bold,
@@ -55,6 +53,15 @@ class FoodScanResultScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        const SizedBox(height: 16),
+                        Text(
+                          'Dữ liệu bên dưới là ví dụ cố định, chưa được tạo từ ảnh hay đánh giá dinh dưỡng thực tế.',
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: AppTheme.accentRed,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                        ),
                         const SizedBox(height: 16),
                         ClipRRect(
                           borderRadius: BorderRadius.circular(20),
@@ -171,74 +178,9 @@ class FoodScanResultScreen extends StatelessWidget {
                 ),
                 Padding(
                   padding: const EdgeInsets.only(bottom: 12.0, top: 8.0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        flex: 4,
-                        child: OutlinedButton(
-                          onPressed: () {
-                            // Replace current result screen with camera scan mock again
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const CameraMockScreen(
-                                  title: 'Quét Bữa Ăn Dinh Dưỡng',
-                                  scanInstruction:
-                                      'Đưa món ăn của mẹ vào chính giữa khung hình',
-                                  nextScreen: FoodScanResultScreen(),
-                                ),
-                              ),
-                            );
-                          },
-                          style: OutlinedButton.styleFrom(
-                            minimumSize: const Size(double.infinity, 54),
-                            side: const BorderSide(
-                                color: AppTheme.primaryPurple, width: 1.5),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                          ),
-                          child: const Text(
-                            'Quét lại',
-                            style: TextStyle(
-                              color: AppTheme.primaryPurple,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 15,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        flex: 6,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            // Save meal to daily meals plan inside AppState
-                            AppState.instance.addMeal({
-                              'type': 'Bữa trưa (Quét AI)',
-                              'foods': 'Cá hồi nướng + rau luộc + cơm trắng',
-                              'calories': '650 kcal',
-                              'icon': Icons.camera_alt_rounded,
-                              'color': const Color(0xFFE8F5E9),
-                              'iconColor': AppTheme.primaryPurple,
-                            });
-
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                    'Đã lưu bữa ăn quét AI vào thực đơn hôm nay!'),
-                                backgroundColor: AppTheme.accentGreen,
-                              ),
-                            );
-                            Navigator.pop(context);
-                          },
-                          style: ElevatedButton.styleFrom(
-                            minimumSize: const Size(double.infinity, 54),
-                          ),
-                          child: const Text('Lưu kết quả'),
-                        ),
-                      ),
-                    ],
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Đóng bản mẫu'),
                   ),
                 ),
               ],

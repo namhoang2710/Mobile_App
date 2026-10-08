@@ -4,6 +4,7 @@ import '../../../app_theme.dart';
 import '../../../core/services/app_state.dart';
 import '../../../core/widgets/nm_design.dart';
 import '../../health/presentation/health_metrics_screen.dart';
+import '../../nutrition_calendar/presentation/calendar_reminder_screen.dart';
 
 class PartnerDashboardScreen extends StatelessWidget {
   const PartnerDashboardScreen({super.key});
@@ -29,7 +30,11 @@ class PartnerDashboardScreen extends StatelessWidget {
         final tasks = state.getFamilyTasksForRole(state.userRole);
 
         // Get upcoming appointments
-        final upcomingReminders = state.reminders.take(2).toList();
+        final upcomingReminders = state.reminders
+            .where((item) => (item['date'] as DateTime).isAfter(DateTime.now()))
+            .toList()
+          ..sort((a, b) =>
+              (a['date'] as DateTime).compareTo(b['date'] as DateTime));
 
         return Scaffold(
           backgroundColor: AppTheme.bg(context),
@@ -73,7 +78,13 @@ class PartnerDashboardScreen extends StatelessWidget {
                                   title: 'Lịch khám',
                                   subtitle: '${state.reminders.length} sự kiện',
                                   color: AppTheme.accentGreen,
-                                  onTap: () {},
+                                  onTap: () => Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) =>
+                                          const CalendarReminderScreen(),
+                                    ),
+                                  ),
                                 ),
                               ),
                             ],
@@ -184,25 +195,12 @@ class PartnerDashboardScreen extends StatelessWidget {
                               ),
                             )
                           else
-                            ...upcomingReminders.map((reminder) => Padding(
+                            ...upcomingReminders.take(2).map((reminder) =>
+                                Padding(
                                   padding: const EdgeInsets.only(bottom: 10),
                                   child: _AppointmentCard(reminder: reminder),
                                 )),
                           const SizedBox(height: 24),
-
-                          // Message to Mom
-                          NmActionCard(
-                            title: 'Nhắn tin cho mẹ',
-                            subtitle: 'Gửi lời yêu thương',
-                            icon: Icons.favorite_rounded,
-                            accent: AppTheme.coral,
-                            onTap: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                    content: Text('Đang mở tin nhắn...')),
-                              );
-                            },
-                          ),
                         ],
                       ),
                     ),
@@ -222,13 +220,9 @@ class PartnerDashboardScreen extends StatelessWidget {
       height: 200,
       padding: const EdgeInsets.fromLTRB(22, 14, 22, 24),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: AppTheme.isDark(context)
-              ? [const Color(0xFF2D3436), const Color(0xFF1A1A2E)]
-              : [const Color(0xFF6C5CE7), const Color(0xFFA29BFE)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: AppTheme.isDark(context)
+            ? AppTheme.darkSurface
+            : AppTheme.primaryPurple,
       ),
       child: Column(
         children: [
@@ -264,11 +258,6 @@ class PartnerDashboardScreen extends StatelessWidget {
                     ),
                   ],
                 ),
-              ),
-              IconButton(
-                onPressed: () {},
-                icon: const Icon(Icons.notifications_none_rounded,
-                    color: Colors.white),
               ),
             ],
           ),

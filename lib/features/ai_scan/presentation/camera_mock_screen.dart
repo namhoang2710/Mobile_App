@@ -22,7 +22,6 @@ class _CameraMockScreenState extends State<CameraMockScreen>
   late AnimationController _animationController;
   late Animation<double> _scanLineAnimation;
   bool _isAnalyzing = false;
-  bool _isFlashOn = false;
 
   @override
   void initState() {
@@ -51,7 +50,7 @@ class _CameraMockScreenState extends State<CameraMockScreen>
       _isAnalyzing = true;
     });
 
-    // Simulate AI analysis for 1.5 seconds
+    // Show the sample result after a short transition.
     Future.delayed(const Duration(milliseconds: 1500), () {
       if (!mounted) return;
       Navigator.pushReplacement(
@@ -156,17 +155,7 @@ class _CameraMockScreenState extends State<CameraMockScreen>
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  IconButton(
-                    icon: Icon(
-                      _isFlashOn ? Icons.flash_on : Icons.flash_off,
-                      color: Colors.white,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _isFlashOn = !_isFlashOn;
-                      });
-                    },
-                  ),
+                  const SizedBox(width: 48),
                 ],
               ),
             ),
@@ -181,8 +170,8 @@ class _CameraMockScreenState extends State<CameraMockScreen>
               children: [
                 Text(
                   _isAnalyzing
-                      ? 'AI đang phân tích...'
-                      : widget.scanInstruction,
+                      ? 'Đang mở kết quả minh họa...'
+                      : 'Mô phỏng camera · không chụp ảnh thật',
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     color: Colors.white70,

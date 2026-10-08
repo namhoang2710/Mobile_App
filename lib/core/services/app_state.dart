@@ -9,7 +9,7 @@ class AppState extends ChangeNotifier {
   String userEmail = 'me.tuoi@gmail.com';
   String userRole = 'Mẹ bầu';
   double pregnancyWeeks = 24.28;
-  DateTime dueDate = DateTime(2026, 8, 15);
+  DateTime dueDate = DateTime.now().add(const Duration(days: 110));
   String avatarPath = ''; // Custom avatar preset name (e.g., 'preset_1')
 
   // Premium Status
@@ -166,7 +166,7 @@ class AppState extends ChangeNotifier {
     {
       'id': '1',
       'title': 'Khám thai định kỳ - Mốc 28 tuần',
-      'date': DateTime(2026, 6, 25, 9, 0),
+      'date': DateTime.now().add(const Duration(days: 14)),
       'location': 'Bệnh viện Phụ sản Quốc tế',
       'note': 'Siêu âm 4D và làm xét nghiệm đường huyết thai kỳ',
       'type': 'medical',
@@ -174,7 +174,7 @@ class AppState extends ChangeNotifier {
     {
       'id': '2',
       'title': 'Uống Sắt & Canxi',
-      'date': DateTime(2026, 6, 21, 8, 0),
+      'date': DateTime.now().add(const Duration(days: 2)),
       'location': 'Nhà',
       'note': 'Uống sau bữa ăn sáng 30 phút, không uống cùng chè/cà phê',
       'type': 'medicine',
@@ -182,7 +182,7 @@ class AppState extends ChangeNotifier {
     {
       'id': '3',
       'title': 'Lớp học tiền sản: Thở & Rặn đẻ',
-      'date': DateTime(2026, 6, 28, 14, 0),
+      'date': DateTime.now().add(const Duration(days: 21)),
       'location': 'Trung tâm MomCare',
       'note': 'Đi cùng chồng, mang theo sổ khám thai',
       'type': 'class',
@@ -200,8 +200,10 @@ class AppState extends ChangeNotifier {
       'recordDate': '2026-06-15',
       'facilityName': 'Bệnh viện Phụ sản Quốc tế',
       'doctorName': 'BS. CKI Trần Thị Phương',
-      'summary': 'Siêu âm 4D hình thái học thai nhi 22 tuần. Thai phát triển bình thường, không thấy dị tật cấu trúc lớn.',
-      'notes': 'Cử động thai tốt. Nhịp tim thai 142 lần/phút. Chiều dài xương đùi và lưỡng đỉnh đạt chuẩn bách phân vị 55.',
+      'summary':
+          'Siêu âm 4D hình thái học thai nhi 22 tuần. Thai phát triển bình thường, không thấy dị tật cấu trúc lớn.',
+      'notes':
+          'Cử động thai tốt. Nhịp tim thai 142 lần/phút. Chiều dài xương đùi và lưỡng đỉnh đạt chuẩn bách phân vị 55.',
       'hasAttachment': true,
       'attachmentName': 'ket_qua_sieu_am_4d_t22.pdf',
     },
@@ -211,8 +213,10 @@ class AppState extends ChangeNotifier {
       'recordDate': '2026-06-20',
       'facilityName': 'Trung tâm Xét nghiệm Medic Lab',
       'doctorName': 'BS. Lê Hoài Nam',
-      'summary': 'Nghiệm pháp dung nạp glucose (OGTT) 3 mẫu tầm soát đái tháo đường thai kỳ.',
-      'notes': 'Chỉ số đường huyết lúc đói 4.8 mmol/L, sau 1h: 7.2 mmol/L, sau 2h: 6.1 mmol/L. Kết quả âm tính.',
+      'summary':
+          'Nghiệm pháp dung nạp glucose (OGTT) 3 mẫu tầm soát đái tháo đường thai kỳ.',
+      'notes':
+          'Chỉ số đường huyết lúc đói 4.8 mmol/L, sau 1h: 7.2 mmol/L, sau 2h: 6.1 mmol/L. Kết quả âm tính.',
       'hasAttachment': true,
       'attachmentName': 'xet_nghiem_ogtt_duong_huyet.pdf',
     },
@@ -223,7 +227,8 @@ class AppState extends ChangeNotifier {
       'facilityName': 'Bệnh viện Phụ sản Quốc tế',
       'doctorName': 'BS. CKI Trần Thị Phương',
       'summary': 'Đơn thuốc bổ sung vi chất dinh dưỡng thai kỳ quý II.',
-      'notes': '1. Canxi Corbiere 5ml: 1 ống/ngày sau ăn sáng\n2. Ferrovit (Sắt & Axit folic): 1 viên/ngày sau ăn trưa 1 tiếng\n3. DHA BioIsland bầu: 2 viên/ngày trong bữa ăn.',
+      'notes':
+          '1. Canxi Corbiere 5ml: 1 ống/ngày sau ăn sáng\n2. Ferrovit (Sắt & Axit folic): 1 viên/ngày sau ăn trưa 1 tiếng\n3. DHA BioIsland bầu: 2 viên/ngày trong bữa ăn.',
       'hasAttachment': false,
       'attachmentName': '',
     },
@@ -234,7 +239,8 @@ class AppState extends ChangeNotifier {
       'facilityName': 'Phòng khám Sản khoa An Sinh',
       'doctorName': 'BS. Nguyễn Thị Minh',
       'summary': 'Khám thai định kỳ mốc 18 tuần.',
-      'notes': 'Huyết áp 115/75 mmHg, cân nặng mẹ 50.8 kg. Bác sĩ dặn duy trì vận động nhẹ nhàng và uống đủ 2.5L nước mỗi ngày.',
+      'notes':
+          'Huyết áp 115/75 mmHg, cân nặng mẹ 50.8 kg. Bác sĩ dặn duy trì vận động nhẹ nhàng và uống đủ 2.5L nước mỗi ngày.',
       'hasAttachment': false,
       'attachmentName': '',
     },
@@ -245,7 +251,7 @@ class AppState extends ChangeNotifier {
     {
       'isUser': false,
       'text':
-          'Xin chào Mẹ Tươi! Em là Trợ lý AI NutriMom. Hiện mẹ đang ở tuần thai 24. Hôm nay mẹ cảm thấy thế nào, có cần em tư vấn về dinh dưỡng, lịch khám hay triệu chứng thai kỳ không ạ?',
+          'Chào mẹ! Đây là bản thử nghiệm của trợ lý NutriMom. Mẹ có thể hỏi về dinh dưỡng, lịch khám và thai kỳ; câu trả lời hiện là nội dung mẫu để tham khảo.',
       'time': 'Vừa xong',
     },
   ];
@@ -453,6 +459,7 @@ class AppState extends ChangeNotifier {
   }
 
   void addMeal(Map<String, dynamic> meal) {
+    hasNutritionPlan = true;
     nutritionPlanMeals.add(meal);
     notifyListeners();
   }
@@ -531,35 +538,35 @@ class AppState extends ChangeNotifier {
     });
     notifyListeners();
 
-    // Contextual AI doctor reply
+    // Prototype answers. No clinical inference or user-specific diagnosis.
     final lower = userText.toLowerCase();
     String botReply;
 
-    if (lower.contains('nghén') || lower.contains('buồn nôn')) {
+    if (lower.contains('đau') ||
+        lower.contains('máu') ||
+        lower.contains('phù') ||
+        lower.contains('sốt') ||
+        lower.contains('cử động') ||
+        lower.contains('đạp')) {
       botReply =
-          'Để giảm ốm nghén, mẹ nên chia nhỏ bữa ăn (5-6 bữa/ngày), tránh đồ dầu mỡ và đồ ngọt đậm. Có thể uống trà gừng ấm hoặc ngậm lát gừng tươi vào buổi sáng. Nếu nôn nhiều dẫn đến mất nước sụt cân, mẹ nên đến cơ sở y tế để được hỗ trợ truyền dịch nhé.';
-    } else if (lower.contains('phù chân') || lower.contains('sưng')) {
+          'Mình chưa thể đánh giá triệu chứng qua trò chuyện. Mẹ hãy ghi lại thời điểm, mức độ và các dấu hiệu đi kèm để trao đổi với bác sĩ. Nếu triệu chứng xuất hiện đột ngột, nặng lên hoặc khiến mẹ lo lắng, hãy liên hệ cơ sở y tế ngay.';
+    } else if (lower.contains('khám') || lower.contains('lịch')) {
       botReply =
-          'Phù chân nhẹ ở tam cá nguyệt 2 và 3 khá phổ biến do tĩnh mạch chi dưới bị tử cung chèn ép. Mẹ nên kê cao chân khi ngồi/ngủ, hạn chế ăn mặn. Lưu ý: nếu phù đột ngột ở cả bàn tay, mặt kèm đau đầu hay mờ mắt, mẹ cần đo huyết áp và đi khám ngay vì đây có thể là dấu hiệu tiền sản giật.';
+          'Trước buổi khám, mẹ có thể chuẩn bị sổ khám thai, kết quả xét nghiệm trước đây, danh sách thuốc đang dùng và các câu hỏi muốn trao đổi. Mục Thai kỳ có phần ghi nhật ký và lịch để mẹ xem lại.';
     } else if (lower.contains('sắt') ||
         lower.contains('canxi') ||
         lower.contains('thuốc') ||
         lower.contains('vitamin')) {
       botReply =
-          'Nguyên tắc vàng khi uống vi chất: Không uống Canxi và Sắt cùng lúc (uống cách nhau ít nhất 2 tiếng). Uống Canxi sau bữa sáng với nhiều nước; Sắt nên uống lúc đói hoặc sau ăn 1 tiếng kèm nước cam/vitamin C để tăng hấp thu tối đa.';
-    } else if (lower.contains('đạp') ||
-        lower.contains('máy') ||
-        lower.contains('cử động')) {
-      botReply =
-          'Từ tuần 28 trở đi, mẹ nên đếm cử động thai: Chọn thời điểm sau bữa ăn, nằm nghiêng trái và đếm trong 1 giờ. Bé đạp từ 4 lần trở lên trong 1 giờ là bình thường. Nếu dưới 4 lần, mẹ uống ly nước mát và đếm tiếp 1 giờ nữa. Nếu vẫn ít, hãy đến bệnh viện kiểm tra tim thai ngay.';
-    } else if (lower.contains('ăn gì') ||
+          'Liều lượng và thời điểm dùng thuốc hoặc thực phẩm bổ sung cần dựa trên hồ sơ của mẹ. Mình chưa có khả năng kiểm tra đơn thuốc; mẹ hãy hỏi bác sĩ hoặc dược sĩ trước khi thay đổi cách dùng.';
+    } else if (lower.contains('ăn') ||
         lower.contains('dinh dưỡng') ||
         lower.contains('thực phẩm')) {
       botReply =
-          'Ở tuần thai hiện tại, bé phát triển nhanh về cơ xương và não bộ. Mẹ ưu tiên nhóm đạm nạc (thịt bò, cá hồi, trứng), rau lá xanh thẫm, các loại hạt (óc chó, hạnh nhân) và uống đủ sữa bầu hoặc sữa tươi không đường tiệt trùng.';
+          'Một thực đơn tham khảo nên có nhiều nhóm thực phẩm và phù hợp với khẩu vị, dị ứng, bệnh lý của mẹ. Mẹ có thể mở mục Ăn uống để tạo kế hoạch mẫu và tự chỉnh từng bữa; kế hoạch đó chưa được cá nhân hóa bởi chuyên gia.';
     } else {
       botReply =
-          'Cảm ơn câu hỏi của mẹ! Ở tuần thai $pregnancyWeeks, sự ổn định của sức khỏe mẹ và bé là ưu tiên hàng đầu. Em đã ghi nhận câu hỏi này. Nếu mẹ có bất kỳ dấu hiệu đau bụng, ra huyết hay sốt, hãy liên hệ ngay bác sĩ sản khoa phụ trách để được thăm khám kịp thời nhé!';
+          'Mình chưa có dữ liệu đáng tin cậy để trả lời riêng câu hỏi này. Mẹ có thể dùng nhật ký để ghi lại điều muốn hỏi và trao đổi với bác sĩ ở lần khám tới.';
     }
 
     Future.delayed(const Duration(milliseconds: 600), () {
